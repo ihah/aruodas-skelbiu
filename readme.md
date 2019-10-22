@@ -29,6 +29,6 @@
 - 'city' - city where apartment is
 - 'years' - year of construction
 - 'area' - area of the apartment
-- 'price' - price of the apartment 
-- 'avg_heat_per_m' - average cost of heating per month in the apartment
+- 'price' - price of the apartment in euros
+- 'avg_heat_per_m' - average cost of heating per month in the apartment in euros **(only in aruodas.lt csv, has nulls)** 
 - 'url' - url to the AD
