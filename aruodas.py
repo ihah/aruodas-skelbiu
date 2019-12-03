@@ -62,8 +62,29 @@ def get_data(city_url):
         years = ''
         area = ''
         heat = ''
+        rooms = ''
+        created_at = ''
+        updated_at = ''
+
+        simple_stats = soup.find("div", class_="obj-stats simple")
+        simple_stats_features = []
+
+        for stat in simple_stats.find_all("dt"):
+            feature_key = stat.text.strip()
+            simple_stats_features.append([feature_key])
+
+        for key, stat in enumerate(simple_stats.find_all("dd")):
+            feature_key = stat.text.strip()
+            simple_stats_features[key].append(feature_key)
+
+        for feature in simple_stats_features:
+            if(feature[0] == "Įdėtas"):
+                created_at =  feature[1]
+            if(feature[0] == 'Redaguotas'):
+                updated_at = feature[1]
         
         dl_data = soup.find("dl", class_="obj-details")
+
         features = []
         for  dt_item in dl_data.find_all("dt"):
             feature_key = dt_item.text.strip()
@@ -79,6 +100,8 @@ def get_data(city_url):
                 years = re.sub( r"([^0-9])", r" \1", feature[1]).split()[0]
             if(feature[0] == "Plotas:"):
                 area =  re.sub('[^0-9\,]', '', feature[1])
+            if(feature[0] == 'Kambarių sk.:'):
+                rooms = re.sub('[^0-9\,]', '', feature[1])
                 
         
         soup = get_soup(get_ajax_url(get_id_from_url(url)))
@@ -88,7 +111,7 @@ def get_data(city_url):
                 heat = re.sub('[^0-9\,]', '', item.find('span', 'cell-data cell-data-inline-block').contents[0])
         
         
-        return [city, years, area, price, heat, url]
+        return [city, years, area, rooms, price, heat, created_at, updated_at, url]
     except:
         return False
     
@@ -102,7 +125,7 @@ if __name__ == "__main__":
     filename = "soup_aruodas_"+time.strftime("%Y_%m_%d-%H%M")+".csv"
  
     # prep file header
-    write_row(['city', 'years', 'area', 'price', 'avg_heat_per_m', 'url'], filename)
+    write_row(['city', 'years', 'area', 'rooms', 'price', 'avg_heat_per_m', 'created_at', 'updated_at', 'url'], filename)
     
     # get urls from page
     url = "https://www.aruodas.lt/butai/puslapis/"
@@ -110,7 +133,7 @@ if __name__ == "__main__":
     search = "/?FHouseState=full"
     
 
-    while(page <= 258):
+    while(page <= 248):
     # get urls and cities from list page    
         print("Page: "+str(page))
         cities_urls = get_ads_urls(url+str(page)+search)

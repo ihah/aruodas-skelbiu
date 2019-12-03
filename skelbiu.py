@@ -29,7 +29,7 @@ def get_soup(url):
     
 def get_ads_urls(url, base):
     soup = get_soup(url)
-    links = [];
+    links = []
     
     for link in soup.find_all('a', 'adsImage js-cfuser-link'):
         links.append(base+link.get('href'))
@@ -50,18 +50,20 @@ def get_data(url):
         city = ''
         years = ''
         area = ''
-        heat = ''
+        rooms = ''
         
         for details in soup.find_all('div', 'detail'):
             title = details.find('div', 'title').text.strip()
             if(title == 'Gyvenvietė:'):
                 city = details.find('div', 'value').get_text(strip=True, separator=',').strip().split(',')[0]
+            if(title == 'Kamb. sk.:'):
+                rooms = re.sub('[^0-9]', '', details.find('div', 'value').text)
             if(title == 'Metai:'):
                 years = re.sub( r"([^0-9])", r" \1", details.find('div', 'value').text).split()[0]
             if(title == 'Plotas, m²:'):
                 area = re.sub('[^0-9\,]', '', details.find('div', 'value').text)
         
-        return [city, years, area, price, heat, url]
+        return [city, years, area, rooms, price, url]
     except:
         return False
 
@@ -69,7 +71,7 @@ if __name__ == "__main__":
     filename = "soup_skelbiu_"+time.strftime("%Y_%m_%d-%H%M")+".csv"
     
     # prep file header
-    write_row(['city', 'years', 'area', 'price', 'avg_heat_per_m', 'url'], filename)
+    write_row(['city', 'years', 'area', 'rooms', 'price', 'url'], filename)
     
     # urls
     base = 'https://www.skelbiu.lt'
@@ -79,14 +81,14 @@ if __name__ == "__main__":
     
     
     # collect only urls
-    # scrap them (city, years, area, price, '', url)
+    # scrap them (city, years, area, rooms, price, '', url)
     
-    while(page <= 51):
+    while(page <= 43):
     # get urls and cities from list page    
         print("Page: "+str(page))
         urls = get_ads_urls(base_url+str(page)+search, base)
         page += 1
-        time.sleep(.5)
+        time.sleep(.3)
         for url in urls:
             data = get_data(url)
             if(data):
